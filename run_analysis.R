@@ -1,7 +1,7 @@
 setwd("c:/datascience");
-fileUrl <- "http://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-download.file(fileUrl,destfile="TestResult.zip")
-unzip("TestResult.zip",exdir="c:/datascience/TestResult")
+#fileUrl <- "http://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+#download.file(fileUrl,destfile="TestResult.zip")
+#unzip("TestResult.zip",exdir="c:/datascience/TestResult")
 
 
 
@@ -14,23 +14,23 @@ setwd("c:/datascience/TestResult/UCI HAR Dataset");
 ################################################################
 
 ## use sep="" for one or more white spaces
-dfXtest  <- read.csv("./test/X_test.txt",sep="", header=FALSE);
-dfXtrain <- read.csv("./train/X_train.txt",sep="", header=FALSE);
+dfXtest  <- read.table("./test/X_test.txt",sep="", header=FALSE);
+dfXtrain <- read.table("./train/X_train.txt",sep="", header=FALSE);
 
-dfYtest <- read.csv("./test/Y_test.txt",sep="", header=FALSE);
-dfYtrain <- read.csv("./train/Y_train.txt",sep="", header=FALSE);
+dfYtest <- read.table("./test/Y_test.txt",sep="", header=FALSE);
+dfYtrain <- read.table("./train/Y_train.txt",sep="", header=FALSE);
 
 ##Read the Subject files
 
-dfSubjecttest <- read.csv("./test/subject_test.txt",sep="", header=FALSE);
-dfsubjecttrain <- read.csv("./train/subject_train.txt",sep="", header=FALSE);
+dfSubjecttest <- read.table("./test/subject_test.txt",sep="", header=FALSE);
+dfsubjecttrain <- read.table("./train/subject_train.txt",sep="", header=FALSE);
 
 
 ## Combine Test and Train data
 
 ## _X_ dataset has the actual measurement data. Its column labels are stored in the feature.txt
 
-dfXCombine       <- rbind(dfXtest, dfXtrain)
+dfXCombine       <- rbind( dfXtrain,dfXtest)
 
 #####################################################################
 ## Step 1a. Load Activity Labels Subjects and Features             ##
@@ -38,11 +38,11 @@ dfXCombine       <- rbind(dfXtest, dfXtrain)
 
 ## _Y_ is the activity index 1..6; it's label is in activity_label.txt
 
-dfYCombine       <- rbind(dfYtest, dfYtrain)
+dfYCombine       <- rbind( dfYtrain,dfYtest)
 
 ## This keeps the people that took the test. Person's are numbered 1..30.
 
-dfSubjectCombine <- rbind(dfSubjecttest, dfsubjecttrain)
+dfSubjectCombine <- rbind( dfsubjecttrain,dfSubjecttest)
 
 names(dfSubjectCombine) <- c("Subject")
 
@@ -53,11 +53,11 @@ names(dfSubjectCombine) <- c("Subject")
 
 ## Read Feature dataset
 
-dfFeature <- read.csv("./features.txt",sep="", header=FALSE);
+dfFeature <- read.table("./features.txt",sep="", header=FALSE);
 
 ## Read the activity 
 
-dfActivityLabel  <- read.csv("./activity_labels.txt",sep="", header=FALSE);
+dfActivityLabel  <- read.table("./activity_labels.txt",sep="", header=FALSE);
 
 ###############################################################################
 ## Step 2: Extracts only the measurements on the mean and standard deviation ##
@@ -94,11 +94,13 @@ names(dfMeasurement) <- dfFeature$V2[dfFilteredFeatures]
 
 ## create a single dataset with activity and activity label
 
-dfActivity <- merge(dfYCombine,dfActivityLabel, by.x="V1", by.y = "V1" )
+#dfActivity[,2] <- merge(dfYCombine,dfActivityLabel, by.x="V1", by.y = "V1" )
+
+dfYCombine[,2] <- dfActivityLabel[dfYCombine[,1],2]
 
 ## Rename its column
 
- names(dfActivity) <- c("Activity_id","Activity")
+ names(dfYCombine) <- c("Activity_id","Activity")
  
 ##dfActivity <- dfActivity$Activity
 ##names(dfActivity) <- c("Activity")
@@ -123,7 +125,7 @@ names(dfMeasurement) <-dfnames
 
 # Merge Subject, Activity and Measurements in that order
 
-dfMeasurement <- cbind(dfSubjectCombine, dfActivity$Activity, dfMeasurement)
+dfMeasurement <- cbind(dfSubjectCombine, dfYCombine$Activity, dfMeasurement)
 names(dfMeasurement)[2] = "Activity"
 
 
